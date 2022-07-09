@@ -331,8 +331,8 @@ end; { TOmniContainerWindowsMessageObserver.Notify }
 procedure TOmniContainerWindowsMessageObserverImpl.PostWithRetry(msg: UINT;
   wParam: WPARAM; lParam: LPARAM);
 const
-  CInitialSleep = 1 {ms};
-  CSecondSleep  = 5 {ms};
+  CInitialSleep = 2 {ms};
+  CMaxSleep     = 500 {ms};
   CMaxTries     = 1000;
 var
   lasterr: cardinal;
@@ -346,7 +346,8 @@ begin
     lasterr := GetLastError;
     if (lasterr = ERROR_NOT_ENOUGH_QUOTA) and (retry < CMaxTries) then begin
       Sleep(wait);
-      wait := CSecondSleep;
+      wait := wait * 3;
+      if wait > CMaxSleep then wait := CMaxSleep;
     end
     else
       RaiseLastOSError(lasterr);
